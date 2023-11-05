@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Restart Sessions</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        td p {
+            font-size: 12px; /* Set the font size for MAC addresses */
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Restart Sessions</h1>
+        <table>
+            <thead>
+                <tr id="header-row">
+                    <!-- Headers will be generated here -->
+                </tr>
+            </thead>
+            <tbody>
+                <tr id="mac-rows">
+                    <!-- MAC addresses will be generated here -->
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Function to read and parse the log.txt file
+        function readLogFile() {
+            fetch('log.txt')
+                .then(response => response.text())
+                .then(data => createRestartSessions(data))
+                .catch(error => console.error('Error reading log file: ', error));
+        }
+
+        // Function to create restart session elements
+        function createRestartSessions(logData) {
+            const sessions = logData.split('Restart number ');
+            const headerRow = document.getElementById('header-row');
+            const macRows = document.getElementById('mac-rows');
+            let columnCount = 1; // Initialize the column count
+
+            for (let i = 1; i < sessions.length; i++) {
+                const sessionData = sessions[i].trim().split('\n');
+                const macAddresses = sessionData.slice(1);
+
+                // Create a header for each restart session column with the column number
+                const columnHeader = document.createElement('th');
+                columnHeader.textContent = 'Restart ' + columnCount;
+                headerRow.appendChild(columnHeader);
+
+                const macCell = document.createElement('td');
+                macCell.style.verticalAlign = 'top';
+
+                for (const mac of macAddresses) {
+                    const macAddress = document.createElement('p');
+                    // Extract and display only the MAC address itself
+                    const macValue = mac.match(/MAC: ([\w:]+)/)[1];
+                    macAddress.textContent = macValue;
+                    macCell.appendChild(macAddress);
+                }
+
+                // Append the column to the table
+                macRows.appendChild(macCell);
+                columnCount++;
+            }
+        }
+
+        // Read and create the table from log.txt on page load
+        window.onload = readLogFile;
+    </script>
+</body>
+</html>
